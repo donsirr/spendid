@@ -6,6 +6,13 @@
         "name": "Main",
         "request": "launch",
         "mainClass": "Main",
+        "projectName": "spendid_6544d305"
+      },
+      {
+        "type": "java",
+        "name": "Main",
+        "request": "launch",
+        "mainClass": "Main",
         "projectName": "FinanceTracker_a49106b2"
       },
       {

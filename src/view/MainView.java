@@ -208,7 +208,6 @@ public class MainView extends JFrame {
                         long number = Long.parseLong(text);
                         String formatted = String.format("%,d", number);
 
-                        // Only update if different to avoid infinite loop
                         if (!formatted.equals(amountField.getText())) {
                             isUpdating = true;
                             amountField.setText(formatted);
