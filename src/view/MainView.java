@@ -24,7 +24,7 @@ public class MainView extends JFrame {
     public MainView() {
         setTitle("Spendid - Student Finance Tracker");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(800, 600);
+        setSize(900, 600);
         setLocationRelativeTo(null);
         setResizable(false);
 

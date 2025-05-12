@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "type": "java",
+        "name": "Main",
+        "request": "launch",
+        "mainClass": "Main",
+        "projectName": "FinanceTracker_a49106b2"
+      },
+      {
+        "type": "java",
+        "name": "Launch Finance Tracker",
+        "request": "launch",
+        "mainClass": "Main",
+        "projectName": "FinanceTracker",
+        "vmArgs": "-cp lib/flatlaf-3.6.jar;bin"
+      }
+    ]
+  }
+  

@@ -1,11 +1,12 @@
 package view;
 
 import model.Transaction;
+import org.json.JSONObject;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
+import java.io.*;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,16 +17,23 @@ public class DashboardPanel extends JPanel {
     private final Map<Rectangle, String> barTooltips = new HashMap<>();
     private final Color darkBackground = new Color(30, 30, 30);
     private final Color cardBackground = new Color(45, 45, 45);
+    private double savingsGoal = 10000;
+    private final String SETTINGS_PATH = "settings.json";
+    private JLabel editIconLabel;
 
     public DashboardPanel(List<Transaction> transactions) {
         this.transactions = transactions;
-        setLayout(null); // we'll position manually
+        setLayout(null);
         setBackground(darkBackground);
         loadFont();
+        loadSettings();
 
         ToolTipManager.sharedInstance().registerComponent(this);
+        setupMouseTooltip();
+        addEditButton();
+    }
 
-        // Handle tooltips on hover
+    private void setupMouseTooltip() {
         addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
@@ -40,12 +48,61 @@ public class DashboardPanel extends JPanel {
         });
     }
 
+    private void addEditButton() {
+        ImageIcon icon = new ImageIcon(getClass().getClassLoader().getResource("img/pencil.png"));
+        Image scaled = icon.getImage().getScaledInstance(14, 14, Image.SCALE_SMOOTH);
+        editIconLabel = new JLabel(new ImageIcon(scaled));
+        editIconLabel.setToolTipText("Edit savings goal");
+        editIconLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        editIconLabel.setBounds(3, 0, 16, 16); // will be positioned dynamically later
+        editIconLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                String input = JOptionPane.showInputDialog(DashboardPanel.this, "Enter new savings goal:", savingsGoal);
+                if (input != null && !input.isBlank()) {
+                    try {
+                        savingsGoal = Double.parseDouble(input);
+                        saveSettings();
+                        repaint();
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(DashboardPanel.this, "Invalid number.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        });
+        add(editIconLabel);
+    }
+
     private void loadFont() {
         try {
             customFont = Font.createFont(Font.TRUETYPE_FONT, getClass().getClassLoader()
                     .getResourceAsStream("fonts/SF-Pro-Display-Medium.ttf")).deriveFont(18f);
         } catch (Exception e) {
-            customFont = getFont().deriveFont(Font.BOLD, 18f); // fallback
+            customFont = getFont().deriveFont(Font.BOLD, 18f);
+        }
+    }
+
+    private void saveSettings() {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(SETTINGS_PATH))) {
+            JSONObject obj = new JSONObject();
+            obj.put("savingsGoal", savingsGoal);
+            writer.write(obj.toString(2));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadSettings() {
+        File file = new File(SETTINGS_PATH);
+        if (file.exists()) {
+            try {
+                String json = new String(java.nio.file.Files.readAllBytes(file.toPath()));
+                JSONObject obj = new JSONObject(json);
+                savingsGoal = obj.optDouble("savingsGoal", 10000);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -66,10 +123,9 @@ public class DashboardPanel extends JPanel {
         int height = getHeight();
 
         double totalIncome = transactions.stream().filter(t -> t.getType().equals("Income"))
-                .mapToDouble(t -> t.getAmount()).sum();
+                .mapToDouble(Transaction::getAmount).sum();
         double totalExpenses = transactions.stream().filter(t -> t.getType().equals("Expense"))
-                .mapToDouble(t -> t.getAmount()).sum();
-        double savingsGoal = 10000; // static for now
+                .mapToDouble(Transaction::getAmount).sum();
 
         // --- Metric Cards ---
         int cardWidth = width / 4;
@@ -80,6 +136,11 @@ public class DashboardPanel extends JPanel {
         drawMetricCard(g2, spacing, topMargin, cardWidth, cardHeight, "Total Income", totalIncome, new Color(0, 200, 0));
         drawMetricCard(g2, spacing * 2 + cardWidth, topMargin, cardWidth, cardHeight, "Total Expenses", totalExpenses, new Color(220, 20, 60));
         drawMetricCard(g2, spacing * 3 + cardWidth * 2, topMargin, cardWidth, cardHeight, "Savings Goal", savingsGoal, new Color(255, 215, 0));
+
+        // Position edit icon beside "Savings Goal"
+        int iconX = spacing * 3 + cardWidth * 2 + 110;
+        int iconY = topMargin + 8;
+        editIconLabel.setBounds(iconX, iconY, 16, 16);
 
         // --- Bar Chart ---
         int chartTop = topMargin + cardHeight + 40;
@@ -98,7 +159,7 @@ public class DashboardPanel extends JPanel {
 
         if (categoryTotals.isEmpty()) return;
 
-        double maxAmount = Collections.max(categoryTotals.values());
+        double maxAmount = Math.max(Collections.max(categoryTotals.values()), savingsGoal);
         int barWidth = 50;
         int gap = 30;
 
@@ -118,10 +179,8 @@ public class DashboardPanel extends JPanel {
             g2.setColor(new Color(100, 181, 246));
             g2.fill(bar);
 
-            // Tooltip mapping
             barTooltips.put(bar, entry.getKey() + ": ₱" + String.format("%,.2f", amount));
 
-            // Draw category label
             g2.setColor(Color.WHITE);
             g2.setFont(getFont().deriveFont(Font.PLAIN, 12f));
             FontMetrics fm = g2.getFontMetrics();
@@ -130,11 +189,17 @@ public class DashboardPanel extends JPanel {
 
             x += barWidth + gap;
         }
+
+        // Draw savings goal as yellow bar
+        int goalHeight = (int) ((savingsGoal / maxAmount) * chartHeight);
+        int y = chartTop + chartHeight - goalHeight;
+        g2.setColor(new Color(255, 215, 0, 180));
+        g2.fillRect(chartLeft, y, chartWidth, 4);
     }
 
     private void drawMetricCard(Graphics2D g2, int x, int y, int w, int h, String title, double amount, Color borderColor) {
         g2.setColor(borderColor);
-        g2.fillRoundRect(x - 2, y - 2, w + 4, h + 4, 12, 12); // outer shadow
+        g2.fillRoundRect(x - 2, y - 2, w + 4, h + 4, 12, 12);
 
         g2.setColor(cardBackground);
         g2.fillRoundRect(x, y, w, h, 12, 12);
