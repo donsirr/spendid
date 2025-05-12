@@ -2,10 +2,10 @@
 
 A modern, minimal finance tracker designed for students. Built with Java Swing and styled with a dark theme.
 
-![screenshot](assets/screenshot1.png)
-![screenshot](assets/screenshot2.png)
-![screenshot](assets/screenshot3.png)
-![screenshot](assets/screenshot4.png)
+![screenshot](https://github.com/donsirr/spendid/blob/main/assets/screenshot1.PNG)
+![screenshot](https://github.com/donsirr/spendid/blob/main/assets/screenshot2.PNG)
+![screenshot](https://github.com/donsirr/spendid/blob/main/assets/screenshot3.PNG)
+![screenshot](https://github.com/donsirr/spendid/blob/main/assets/screenshot4.PNG)
 
 ## ✨ Features
 
