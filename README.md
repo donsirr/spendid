@@ -4,9 +4,6 @@ A modern, minimal finance tracker designed for students. Built with Java Swing a
 
 ![screenshot](https://github.com/donsirr/spendid/blob/main/assets/screenshot1.PNG)
 ![screenshot](https://github.com/donsirr/spendid/blob/main/assets/screenshot2.PNG)
-![screenshot](https://github.com/donsirr/spendid/blob/main/assets/screenshot3.PNG)
-![screenshot](https://github.com/donsirr/spendid/blob/main/assets/screenshot4.PNG)
-
 ## ✨ Features
 
 - 📊 **Dashboard View**: Interactive bar chart showing expenses by category, with tooltips.
