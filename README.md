@@ -2,7 +2,10 @@
 
 A modern, minimal finance tracker designed for students. Built with Java Swing and styled with a dark theme.
 
-![screenshot](assets/screenshot.png)
+![screenshot](assets/screenshot1.png)
+![screenshot](assets/screenshot2.png)
+![screenshot](assets/screenshot3.png)
+![screenshot](assets/screenshot4.png)
 
 ## ✨ Features
 
